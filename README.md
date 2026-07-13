@@ -39,6 +39,11 @@ We calculate Welch's t-test p-values at every time point for each experiment and
 
 **Key Finding:** Experiment `036afc` is a classic false trigger — its p-value dips below 0.05 mid-test but ends at ~0.45 (inconclusive). Peeking would have led to an incorrect decision.
 
+#### Visual Evidence: The Danger of Telemetry Loss
+During continuous frequentist monitoring, data pipeline errors can trigger catastrophic false positives. In Experiment `162a38`, a single-day telemetry failure caused the p-value to plummet to 0.0 before immediately returning to baseline. An automated script would have prematurely deployed a broken feature based on this noise.
+
+![Telemetry Loss Anomaly](images/telemetry-loss.png)
+
 ### Part 2: Bayesian Sequential Analysis
 
 We implement a Bayesian Sequential Testing framework using Monte Carlo sampling:
@@ -47,6 +52,7 @@ We implement a Bayesian Sequential Testing framework using Monte Carlo sampling:
 - **Expected Loss:** Average loss if we deploy Treatment prematurely
 
 **Stopping Rules:**
+
 | Condition | Decision |
 |-----------|----------|
 | Expected Loss < ε AND P(T > C) > 0.95 | STOP & DEPLOY |
@@ -84,6 +90,8 @@ We run the Bayesian framework across all 312 streams and calculate:
 ## Project Structure
 
 ```text
-├── Sequential_Testing_Analysis.ipynb   # Main notebook (combined & improved)
+├── images/
+│   └── telemetry-loss.png               # Visual evidence of frequentist failure
+├── Sequential_Testing_Analysis.ipynb    # Main notebook (combined & improved)
 ├── asos_digital_experiments_dataset.csv # Dataset
-└── README.md                           # This file
+└── README.md                            # This file
