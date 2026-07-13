@@ -2,96 +2,170 @@
 
 > **Why you should stop peeking at p-values — and what to do instead.**
 
-This project demonstrates the difference between Traditional Frequentist and Bayesian Sequential approaches to A/B testing using the ASOS dataset.
+This project compares traditional Frequentist A/B testing with Bayesian Sequential Testing using the ASOS Digital Experiments dataset. It demonstrates how continuous monitoring of p-values can produce misleading decisions and how Bayesian sequential methods provide a principled stopping strategy.
 
 ---
 
-## The Problem
+## Overview
 
-In traditional A/B testing, organizations typically:
+Traditional A/B testing assumes that statistical significance is evaluated only after a predetermined sample size or experiment duration. In practice, teams often monitor experiments continuously and make decisions as soon as a p-value crosses a significance threshold.
 
-1. Run an experiment for a fixed duration.
-2. Check the p-value at the end.
-3. Declare a winner if p < 0.05.
+This behavior, known as **peeking**, increases the probability of false positives and can lead to incorrect product decisions.
 
-When analysts peek at results during the test, the p-value fluctuates wildly — sometimes dipping below 0.05 temporarily. This creates false triggers that lead teams to ship underperforming features.
+This project analyzes real-world experiment data to:
 
-This project quantifies this problem and presents the Bayesian solution.
+- Demonstrate the pitfalls of frequentist sequential monitoring
+- Implement Bayesian Sequential Testing
+- Compare stopping behavior across both approaches
+- Estimate time and traffic savings from early stopping
+
+---
+
+## Tech Stack
+
+- Python 3.11+
+- NumPy
+- Pandas
+- SciPy
+- Matplotlib
+- Jupyter Notebook
 
 ---
 
 ## Dataset
 
-We use the ASOS Digital Experiments Dataset, which contains time-series summary statistics for:
-- 78 unique experiments
-- 4 metrics per experiment (312 total experiment-metric streams)
-- Summary stats at each time point: `count_c`, `count_t`, `mean_c`, `mean_t`, `variance_c`, `variance_t`
+This project uses the **ASOS Digital Experiments Dataset**, which contains summary statistics from online A/B experiments.
 
-> **Note:** Place the dataset file `asos_digital_experiments_dataset.csv` in the project root directory before running the notebook.
+Dataset includes:
+
+- 78 experiments
+- 4 metrics per experiment
+- 312 experiment–metric streams
+
+Each observation contains:
+
+- `count_c`
+- `count_t`
+- `mean_c`
+- `mean_t`
+- `variance_c`
+- `variance_t`
+
+Download the dataset from:
+
+https://osf.io/64jsb/files/hq8sc
+
+Place the downloaded file as:
+
+```
+asos_digital_experiments_dataset.csv
+```
+
+in the project root before running the notebook.
 
 ---
 
-## Analysis Overview
+## Installation
 
-### Part 1: Frequentist Analysis — The Peeking Problem
+Clone the repository:
 
-We calculate Welch's t-test p-values at every time point for each experiment and visualize how they fluctuate over time.
+```bash
+git clone https://github.com/<your-username>/sequential-AB-testing.git
+cd sequential-AB-testing
+```
 
-**Key Finding:** Experiment `036afc` is a classic false trigger — its p-value dips below 0.05 mid-test but ends at ~0.45 (inconclusive). Peeking would have led to an incorrect decision.
+Install dependencies:
 
-#### Visual Evidence: The Danger of Telemetry Loss
-During continuous frequentist monitoring, data pipeline errors can trigger catastrophic false positives. In Experiment `162a38`, a single-day telemetry failure caused the p-value to plummet to 0.0 before immediately returning to baseline. An automated script would have prematurely deployed a broken feature based on this noise.
+```bash
+pip install numpy pandas scipy matplotlib
+```
 
-![Telemetry Loss Anomaly](images/telemetry-loss.png)
+Launch the notebook:
 
-### Part 2: Bayesian Sequential Analysis
+```bash
+jupyter notebook Sequential_Testing_Analysis.ipynb
+```
 
-We implement a Bayesian Sequential Testing framework using Monte Carlo sampling:
+---
 
-- **P(T > C):** Probability that Treatment outperforms Control
-- **Expected Loss:** Average loss if we deploy Treatment prematurely
+## Analysis
 
-**Stopping Rules:**
+### 1. Frequentist Analysis
+
+The notebook computes Welch's t-test p-values at every observation to simulate continuous monitoring.
+
+The analysis demonstrates how p-values fluctuate during an experiment and how temporary statistical significance can disappear by the end of the test.
+
+It also highlights the impact of data anomalies, such as telemetry failures, on sequential monitoring.
+
+---
+
+### 2. Bayesian Sequential Analysis
+
+A Bayesian Sequential Testing framework is implemented using Monte Carlo sampling.
+
+For each observation, the notebook estimates:
+
+- Probability that Treatment outperforms Control
+- Expected Loss of deploying the treatment
+
+Stopping rules:
 
 | Condition | Decision |
 |-----------|----------|
-| Expected Loss < ε AND P(T > C) > 0.95 | STOP & DEPLOY |
-| Expected Loss < ε AND P(T > C) < 0.05 | STOP & ROLLBACK |
-| Otherwise | Keep Running |
-
-### Part 3: Data Aggregator
-
-For every experiment-metric stream, we compute:
-- **Final Status:** Was the test a genuine winner at the end of the duration?
-- **False Trigger:** Did it temporarily appear significant but end up inconclusive?
-
-### Part 4: Full-Scale Savings Overview
-
-We run the Bayesian framework across all 312 streams and calculate:
-- Total experiments stopped early
-- Total days saved
-- Total user traffic saved
+| Expected Loss < ε and P(Treatment > Control) > 0.95 | Stop and Deploy |
+| Expected Loss < ε and P(Treatment > Control) < 0.05 | Stop and Rollback |
+| Otherwise | Continue Experiment |
 
 ---
 
-## Key Results
+### 3. Experiment Summary
+
+For every experiment–metric stream, the notebook records:
+
+- Final experiment outcome
+- Whether a temporary false trigger occurred
+- Bayesian stopping point
+- Time saved by early stopping
+
+---
+
+### 4. Overall Results
+
+The Bayesian framework is evaluated across all 312 experiment streams.
 
 | Metric | Value |
-|--------|-------|
+|---------|------:|
 | Total Streams Evaluated | 312 |
 | Streams Stopped Early | 158 (50.6%) |
-| Total Days Saved | ~5,567 days |
-| Total Users Saved | ~2.65 billion impressions |
+| Total Days Saved | ~5,567 |
+| Total User Impressions Saved | ~2.65 Billion |
 
-> By adopting Bayesian Sequential Testing, organizations can cut experiment duration in half while making safer deployment decisions.
+The results show that Bayesian Sequential Testing can substantially reduce experiment duration while maintaining a principled decision process.
 
 ---
 
 ## Project Structure
 
-```text
+```
+sequential-AB-testing/
+│
 ├── images/
-│   └── telemetry-loss.png               # Visual evidence of frequentist failure
-├── Sequential_Testing_Analysis.ipynb    # Main notebook (combined & improved)
-├── asos_digital_experiments_dataset.csv # Dataset
-└── README.md                            # This file
+│   └── telemetry-loss.png
+│
+├── Sequential_Testing_Analysis.ipynb
+├── asos_digital_experiments_dataset.csv
+└── README.md
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Disclaimer
+
+The ASOS Digital Experiments Dataset is provided for research purposes. The experiment results are not representative of ASOS's overall business operations, product development practices, or experimentation program, and no such conclusions should be drawn from this dataset.
