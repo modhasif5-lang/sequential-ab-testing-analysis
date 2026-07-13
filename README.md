@@ -99,7 +99,7 @@ The notebook illustrates how p-values fluctuate throughout the experiment and ho
 ### Telemetry Loss Anomaly
 
 The treatment mean entry for **Experiment `036afc`, Metric `1`** taken 38 days since the start of the experiment shows a spike as compared to that of the control mean and treatment in surrounding time points, i.e., whose p-value briefly falls below **0.05** during the experiment but finishes around **0.45**, demonstrating a classic false trigger that could have resulted in an incorrect deployment.
-<!.--During the analysis of the 312 metric streams,these two significant edge cases were identified that highlight the necessity of robust data validation before executing sequential testing boundaries.-->
+<!--During the analysis of the 312 metric streams,these two significant edge cases were identified that highlight the necessity of robust data validation before executing sequential testing boundaries.-->
 
 <details>
 <summary>Case Study: Telemetry Loss Detection (Experiment 162a38)</b></summary>
