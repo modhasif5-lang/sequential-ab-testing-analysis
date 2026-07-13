@@ -96,20 +96,18 @@ Welch's t-test is computed at every available observation to simulate continuous
 
 The notebook illustrates how p-values fluctuate throughout the experiment and how temporary statistical significance can disappear by the end of the test.
 
-One notable example is **Experiment `036afc`**, whose p-value briefly falls below **0.05** during the experiment but finishes around **0.45**, demonstrating a classic false trigger that could have resulted in an incorrect deployment.
+### Telemetry Loss Anomaly
 
-### Visual Evidence: Telemetry Loss Anomaly
-
-Another interesting case is **Experiment `162a38` (Metric 1)**.
-
-According to the ASOS Digital Experiments Dataset documentation:
-
-> **The treatment mean entry for Experiment `162a38`, Metric 1, taken 38 days since the start of the experiment demonstrates a spike compared to both the control mean and the surrounding treatment observations, which could be the result of telemetry loss.**
-
-This data anomaly briefly causes the Frequentist p-value to collapse to nearly **0.0** before immediately returning to its normal trajectory. Under continuous p-value monitoring, such a temporary anomaly could incorrectly signal statistical significance and trigger deployment of a feature that has no real effect.
+The treatment mean entry for **Experiment `036afc`, Metric `1`** taken 38 days since the start of the experiment shows a spike as compared to that of the control mean and treatment in surrounding time points, i.e., whose p-value briefly falls below **0.05** during the experiment but finishes around **0.45**, demonstrating a classic false trigger that could have resulted in an incorrect deployment.
+<!.--During the analysis of the 312 metric streams,these two significant edge cases were identified that highlight the necessity of robust data validation before executing sequential testing boundaries.-->
 
 <details>
-<summary><strong> Show Image</strong></summary>
+<summary>Case Study: Telemetry Loss Detection (Experiment 162a38)</b></summary>
+
+On Day 38 of Experiment `162a38`, the calculated p-value dropped sharply to 0.0 before returning immediately to baseline on Day 39. This single-day spike indicates an isolated data pipeline failure or telemetry loss rather than genuine user behavioral shifts. An automated frequentist peeking script would have triggered a false deployment here.
+</details>
+<details>
+<summary><strong> View image here</strong></summary>
 
 <br>
 
